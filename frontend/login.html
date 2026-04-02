@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #f4f4f4;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            max-width: 350px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background: #333;
+            color: white;
+            border-radius: 6px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login</h2>
+
+        <input id="email" type="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button id="loginBtn">Login</button>
+
+        <p id="message"></p>
+
+        <a href="index.html">Back to Home</a>
+    </div>
+
+    <script>
+        document.getElementById("loginBtn").addEventListener("click", login);
+
+        async function login() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const message = document.getElementById("message");
+
+            message.textContent = "";
+
+            try {
+                const res = await fetch("http://127.0.0.1:5050/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                console.log("LOGIN RESPONSE:", data);
+
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    window.location.href = "dashboard.html";
+                } else {
+                    message.textContent = data.message || "Login failed";
+                }
+            } catch (error) {
+                console.error("LOGIN ERROR:", error);
+                message.textContent = "Something went wrong";
+            }
+        }
+    </script>
+</body>
+
+</html>

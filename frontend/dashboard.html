@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #f4f4f4;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 10px 16px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            background: #333;
+            color: white;
+            border-radius: 6px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        #uploadBtn {
+            margin-left: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .file-info {
+            word-break: break-word;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: #b00020;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        .open-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .open-link:hover {
+            text-decoration: underline;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        #fileInput {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <h2>Dashboard</h2>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <h3>Upload File</h3>
+        <input type="file" id="fileInput">
+        <button id="uploadBtn">Upload</button>
+
+        <p id="message"></p>
+
+        <h3>Your Files</h3>
+        <ul id="files"></ul>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("token");
+        const message = document.getElementById("message");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        document.getElementById("uploadBtn").addEventListener("click", upload);
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        }
+
+        async function upload() {
+            const file = document.getElementById("fileInput").files[0];
+
+            if (!file) {
+                message.textContent = "Please choose a file";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const res = await fetch("http://127.0.0.1:5050/api/upload", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                message.textContent = data.message;
+
+                if (res.ok) {
+                    document.getElementById("fileInput").value = "";
+                    loadFiles();
+                }
+            } catch (error) {
+                console.error("UPLOAD ERROR:", error);
+                message.textContent = "Upload failed";
+            }
+        }
+
+        async function loadFiles() {
+            try {
+                const res = await fetch("http://127.0.0.1:5050/api/my-files", {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                const data = await res.json();
+                const list = document.getElementById("files");
+                list.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    list.innerHTML = "<li>No files uploaded yet.</li>";
+                    return;
+                }
+
+                data.forEach(file => {
+                    const li = document.createElement("li");
+
+                    li.innerHTML = `
+            <div class="file-info">
+              <div><strong>${file.filename}</strong></div>
+              <div>Size: ${file.size} bytes</div>
+            </div>
+            <div class="actions">
+              <a class="open-link" href="http://127.0.0.1:5050${file.path}" target="_blank">Open</a>
+              <button class="delete-btn" onclick="deleteFile('${file._id}')">Delete</button>
+            </div>
+          `;
+
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error("LOAD FILES ERROR:", error);
+                message.textContent = "Could not load files";
+            }
+        }
+
+        async function deleteFile(id) {
+            try {
+                const res = await fetch(`http://127.0.0.1:5050/api/files/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                const data = await res.json();
+                message.textContent = data.message;
+                loadFiles();
+            } catch (error) {
+                console.error("DELETE ERROR:", error);
+                message.textContent = "Delete failed";
+            }
+        }
+
+        loadFiles();
+    </script>
+</body>
+
+</html>
