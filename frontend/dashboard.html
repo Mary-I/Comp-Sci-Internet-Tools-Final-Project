@@ -3,13 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
-            margin: 0 auto;
+            margin: auto;
             padding: 40px;
             background: #f4f4f4;
         }
@@ -29,12 +29,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         button {
             padding: 10px 16px;
-            font-size: 15px;
             cursor: pointer;
             border: none;
             background: #333;
@@ -46,8 +45,17 @@
             background: #555;
         }
 
-        #uploadBtn {
-            margin-left: 10px;
+        .delete-btn {
+            background: #b00020;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        input {
+            padding: 8px;
+            margin-top: 10px;
         }
 
         ul {
@@ -63,7 +71,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -73,26 +80,13 @@
 
         .actions {
             display: flex;
-            gap: 8px;
-            align-items: center;
+            gap: 10px;
         }
 
-        .delete-btn {
-            background: #b00020;
-        }
-
-        .delete-btn:hover {
-            background: #d32f2f;
-        }
-
-        .open-link {
+        a {
             text-decoration: none;
             color: #333;
             font-weight: bold;
-        }
-
-        .open-link:hover {
-            text-decoration: underline;
         }
 
         #message {
@@ -100,27 +94,36 @@
             font-weight: bold;
         }
 
-        #fileInput {
-            margin-top: 10px;
+        .nav-links {
+            margin-top: 15px;
         }
     </style>
 </head>
 
 <body>
+
     <div class="container">
+
         <div class="top-bar">
             <h2>Dashboard</h2>
             <button onclick="logout()">Logout</button>
         </div>
 
+        <!-- NAVIGATION -->
+        <div class="nav-links">
+            <a href="downloads.html">Go to Downloads</a>
+        </div>
+
         <h3>Upload File</h3>
+
         <input type="file" id="fileInput">
-        <button id="uploadBtn">Upload</button>
+        <button onclick="upload()">Upload</button>
 
         <p id="message"></p>
 
         <h3>Your Files</h3>
         <ul id="files"></ul>
+
     </div>
 
     <script>
@@ -131,18 +134,18 @@
             window.location.href = "login.html";
         }
 
-        document.getElementById("uploadBtn").addEventListener("click", upload);
-
+        // LOGOUT
         function logout() {
             localStorage.removeItem("token");
             window.location.href = "login.html";
         }
 
+        // UPLOAD FILE
         async function upload() {
             const file = document.getElementById("fileInput").files[0];
 
             if (!file) {
-                message.textContent = "Please choose a file";
+                message.textContent = "Please select a file";
                 return;
             }
 
@@ -165,12 +168,14 @@
                     document.getElementById("fileInput").value = "";
                     loadFiles();
                 }
+
             } catch (error) {
-                console.error("UPLOAD ERROR:", error);
+                console.error(error);
                 message.textContent = "Upload failed";
             }
         }
 
+        // LOAD USER FILES
         async function loadFiles() {
             try {
                 const res = await fetch("http://127.0.0.1:5050/api/my-files", {
@@ -183,8 +188,8 @@
                 const list = document.getElementById("files");
                 list.innerHTML = "";
 
-                if (!Array.isArray(data) || data.length === 0) {
-                    list.innerHTML = "<li>No files uploaded yet.</li>";
+                if (data.length === 0) {
+                    list.innerHTML = "<li>No files uploaded yet</li>";
                     return;
                 }
 
@@ -192,24 +197,27 @@
                     const li = document.createElement("li");
 
                     li.innerHTML = `
-            <div class="file-info">
-              <div><strong>${file.filename}</strong></div>
-              <div>Size: ${file.size} bytes</div>
-            </div>
-            <div class="actions">
-              <a class="open-link" href="http://127.0.0.1:5050${file.path}" target="_blank">Open</a>
-              <button class="delete-btn" onclick="deleteFile('${file._id}')">Delete</button>
-            </div>
-          `;
+        <div class="file-info">
+          <strong>${file.filename}</strong><br>
+          Size: ${file.size} bytes
+        </div>
+
+        <div class="actions">
+          <a href="http://127.0.0.1:5050${file.path}" target="_blank">Open</a>
+          <button class="delete-btn" onclick="deleteFile('${file._id}')">Delete</button>
+        </div>
+      `;
 
                     list.appendChild(li);
                 });
+
             } catch (error) {
-                console.error("LOAD FILES ERROR:", error);
-                message.textContent = "Could not load files";
+                console.error(error);
+                message.textContent = "Failed to load files";
             }
         }
 
+        // DELETE FILE
         async function deleteFile(id) {
             try {
                 const res = await fetch(`http://127.0.0.1:5050/api/files/${id}`, {
@@ -222,14 +230,17 @@
                 const data = await res.json();
                 message.textContent = data.message;
                 loadFiles();
+
             } catch (error) {
-                console.error("DELETE ERROR:", error);
+                console.error(error);
                 message.textContent = "Delete failed";
             }
         }
 
+        // INITIAL LOAD
         loadFiles();
     </script>
+
 </body>
 
 </html>

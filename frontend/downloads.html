@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Downloads</title>
+</head>
+
+<body>
+
+    <h2>All Files</h2>
+    <ul id="files"></ul>
+
+    <script>
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        async function loadFiles() {
+            const res = await fetch("http://127.0.0.1:5050/api/public-files", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            const data = await res.json();
+            const list = document.getElementById("files");
+
+            list.innerHTML = "";
+
+            data.forEach(file => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+      ${file.filename} (by ${file.uploadedBy.username})
+      <a href="http://127.0.0.1:5050${file.path}" target="_blank">Open</a>
+    `;
+                list.appendChild(li);
+            });
+        }
+
+        loadFiles();
+    </script>
+
+</body>
+
+</html>
