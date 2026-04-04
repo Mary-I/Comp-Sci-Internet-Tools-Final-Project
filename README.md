@@ -80,8 +80,12 @@ JWT_SECRET=your_secret_key
 
 ### 6. Start MongoDB
 
-Run:
+Make sure MongoDB is running on your computer.
+
+If you installed MongoDB using Homebrew, run:
 brew services start mongodb/brew/mongodb-community
+
+If MongoDB is already running, you can skip this step.
 
 ---
 
