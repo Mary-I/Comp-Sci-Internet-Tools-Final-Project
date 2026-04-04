@@ -1,47 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <title>Downloads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: auto;
+            padding: 40px;
+            background: #f4f4f4;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
+        }
+
+        button {
+            padding: 10px 16px;
+            cursor: pointer;
+            border: none;
+            background: #333;
+            color: white;
+            border-radius: 6px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f9f9f9;
+            margin-bottom: 12px;
+            padding: 14px;
+            border-radius: 6px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .meta {
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        #message {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="container">
+        <div class="top-bar">
+            <h2>Downloads</h2>
+            <button onclick="logout()">Logout</button>
+        </div>
 
-    <h2>All Files</h2>
-    <ul id="files"></ul>
+        <div class="nav-links">
+            <a href="dashboard.html">Go to My Files</a>
+        </div>
+
+        <ul id="files"></ul>
+        <p id="message"></p>
+    </div>
 
     <script>
         const token = localStorage.getItem("token");
+        const message = document.getElementById("message");
 
         if (!token) {
             window.location.href = "login.html";
         }
 
-        async function loadFiles() {
-            const res = await fetch("http://127.0.0.1:5050/api/public-files", {
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            });
-
-            const data = await res.json();
-            const list = document.getElementById("files");
-
-            list.innerHTML = "";
-
-            data.forEach(file => {
-                const li = document.createElement("li");
-                li.innerHTML = `
-      ${file.filename} (by ${file.uploadedBy.username})
-      <a href="http://127.0.0.1:5050${file.path}" target="_blank">Open</a>
-    `;
-                list.appendChild(li);
-            });
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
         }
 
-        loadFiles();
-    </script>
+        async function loadAllFiles() {
+            try {
+                const res = await fetch("http://127.0.0.1:5050/api/public-files", {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
 
+                if (!res.ok) {
+                    message.textContent = "Could not load files";
+                    return;
+                }
+
+                const data = await res.json();
+                const list = document.getElementById("files");
+                list.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    list.innerHTML = "<li>No files available.</li>";
+                    return;
+                }
+
+                data.forEach(file => {
+                    const ownerName = file.uploadedBy?.username || file.uploadedBy?.email || "Unknown";
+                    const uploadedTime = new Date(file.uploadedAt).toLocaleString();
+
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+            <div class="file-name">${file.filename}</div>
+            <div class="meta">Size: ${file.size} bytes</div>
+            <div class="meta">Uploaded: ${uploadedTime}</div>
+            <div class="meta">Owner: ${ownerName}</div>
+            <a href="http://127.0.0.1:5050${file.path}" target="_blank">Open</a>
+          `;
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error(error);
+                message.textContent = "Something went wrong while loading files";
+            }
+        }
+
+        loadAllFiles();
+    </script>
 </body>
 
 </html>
