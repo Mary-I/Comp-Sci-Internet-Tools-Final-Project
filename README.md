@@ -70,11 +70,15 @@ npm install
 
 ### 5. Create a `.env` file
 
-Inside the backend folder, create a file named .env and add:
+Inside the `backend` folder, create a file named `.env`.
+
+This file is not included in the repository for security reasons, so it must be created manually.
+
+Add the following:
 
 PORT=5050  
 MONGO_URI=mongodb://127.0.0.1:27017/secure_file_hosting  
-JWT_SECRET=your_secret_key  
+JWT_SECRET=your_secret_key
 
 ---
 
