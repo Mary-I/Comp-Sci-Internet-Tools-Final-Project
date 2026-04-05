@@ -39,9 +39,19 @@ The goal of this project was to build an application where users can register, l
 
 ## ⚙️ How to Run the Project (Step by Step)
 
-### 1. Open Terminal
+Follow these steps to run the project on your computer.
 
-On Mac/Windows open terminal 
+---
+
+### 1. Open Terminal / Command Prompt
+
+Mac:
+- Press Command + Space → type "Terminal"
+
+Windows:
+- Press Windows + R → type `cmd` → press Enter  
+or open PowerShell
+
 ---
 
 ### 2. Clone the repository
@@ -52,12 +62,16 @@ git clone https://github.com/Mary-I/Comp-Sci-Internet-Tools-Final-Project.git
 Then run:
 cd Comp-Sci-Internet-Tools-Final-Project
 
+👉 This downloads the project and moves into the folder.
+
 ---
 
 ### 3. Go into the backend folder
 
 Run:
 cd backend
+
+👉 This moves into the backend directory.
 
 ---
 
@@ -66,11 +80,13 @@ cd backend
 Run:
 npm install
 
+👉 This installs all required packages listed in package.json.
+
 ---
 
 ### 5. Create a `.env` file
 
-Inside the `backend` folder, create a file named `.env`.
+Inside the backend folder, create a file named `.env`.
 
 This file is not included in the repository for security reasons, so it must be created manually.
 
@@ -78,7 +94,9 @@ Add the following:
 
 PORT=5050  
 MONGO_URI=mongodb://127.0.0.1:27017/secure_file_hosting  
-JWT_SECRET=your_secret_key
+JWT_SECRET=your_secret_key  
+
+Replace `your_secret_key` with any random string.
 
 ---
 
@@ -86,8 +104,14 @@ JWT_SECRET=your_secret_key
 
 Make sure MongoDB is running on your computer.
 
-If you installed MongoDB using Homebrew, run:
+Mac (Homebrew):
 brew services start mongodb/brew/mongodb-community
+
+Windows:
+- Press Windows + R
+- Type services.msc
+- Find MongoDB
+- Click Start
 
 If MongoDB is already running, you can skip this step.
 
@@ -98,6 +122,8 @@ If MongoDB is already running, you can skip this step.
 Run:
 npm run dev
 
+👉 This starts the backend server using nodemon.
+
 You should see:
 MongoDB connected  
 Server running on port 5050  
@@ -107,26 +133,35 @@ Server running on port 5050
 ### 8. Open the frontend
 
 Go to the frontend folder and open:
+
 index.html
 
 You can:
 - double-click the file  
 or  
-- use Live Server in VS Code  
+- use Live Server in VS Code (recommended)
 
 ---
 
 ### 9. Use the application
 
-1. Click **Go to Login**
+1. Click Register and create a new account  
 2. Log in with your account  
 3. Upload a file  
 4. View your files in the dashboard  
-5. Navigate to the Downloads page to see all uploaded files  
+5. Go to the Downloads page to see all files  
 
 ---
 
+### ⚠️ Important Notes
+
+- The backend server must be running for the app to work  
+- MongoDB must be running before starting the server  
+- Only .pdf and .mp4 files are allowed  
+- Maximum file size is 20MB  
 ## 🌐 API Endpoints
+
+
 
 ### Authentication
 - POST /api/register
